@@ -16,29 +16,17 @@ const productID = regexMatch[0];
 const quantity = document.querySelector('#quantity');
 const CTA = document.querySelector('#addToCart');
 
+// // create error message fot ATB button
+// let lineBreak = document.createElement('br');
+// let newElement = document.createElement('p');
+// newElement.id = 'ATBErrorMsg';
+// //Insert the html, 'afterend' is the position.
+// CTA.insertAdjacentHTML('afterend', lineBreak.outerHTML + newElement.outerHTML);
+
 // Prepare request
 let apiRequest = new XMLHttpRequest();
 
-// Create a Promise
-// const requestPromise = new Promise((resolve, reject) => {
-//     apiRequest.open('GET', 'http://localhost:3000/api/products/' + productID);
 
-//     apiRequest.onreadystatechange = () => {
-//         if (apiRequest.readyState === 4) {
-//             // API returns JSON, but the request receives it as text. 
-//             const responseClean = JSON.parse(apiRequest.response);
-//             resolve(responseClean);
-
-//         } else if (apiRequest.readyState === 4 && apiRequest.status !== 200) {
-//             // Reject the promise if the status is not 200
-//             reject(JSON.parse(apiRequest.response));
-//         }
-//     };
-
-//     apiRequest.send();
-// });
-
-// Use the Promise
 fetch('http://localhost:3000/api/products/' + productID) 
     .then(response => response.json())
 
@@ -79,8 +67,10 @@ CTA.addEventListener ('click', ($event) => {
     //prevent default behavior when clicked. 
     $event.preventDefault();
 
+    //only do something if color and quantity has selected values.  
     if (colorContainer.value !== '' && quantity.value !== '0') {
 
+        //if cartItems is not empty, check for matching entries. 
         if (cartItems.length !== 0) {
 
             const match = cartItems.find(item => item._id === productID && item.color === colorContainer.value);
@@ -89,8 +79,10 @@ CTA.addEventListener ('click', ($event) => {
                 // if it matches, add the quantity in the dropdown to the match quantity.
                 const newQuantity = parseInt(match.quantity) + parseInt(quantity.value);
                 match.quantity = String(newQuantity);
+                alert('Item was added to the cart.');
     
             } else {
+                // if there is no match, add a new entry. 
                 const ATBProduct = {
                     _id: productID,
                     color: colorContainer.value,
@@ -98,8 +90,10 @@ CTA.addEventListener ('click', ($event) => {
                 };
             
                 cartItems.push(ATBProduct);
+                alert('Item was added to the cart.');
             };
 
+        //if cartItems is empty, enter the product selected by the user. 
         } else {
             const ATBProduct = {
                 _id: productID,
@@ -108,12 +102,18 @@ CTA.addEventListener ('click', ($event) => {
             };
         
             cartItems.push(ATBProduct);
+            alert('Item was added to the cart.');
         };
 
+    } else {
+        // const ATBErrorMsg = document.querySelector('#ATBErrorMsg');
+        // ATBErrorMsg.textContent = 'Please select a color and quantity.';
+        alert('Please select a color and quantity.');
     };
 
     console.log(cartItems);
 
+    //update localStorage
     localStorage.setItem('cart', JSON.stringify(cartItems));
     console.log(localStorage);
 });
