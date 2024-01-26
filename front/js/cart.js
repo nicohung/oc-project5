@@ -470,6 +470,7 @@ function orderBtn() {
             .then (data => {
                 console.log('Success:', data);
                 console.log(data.orderId);
+                localStorage.clear();
         
                 let confirmationURL = new URL('http://127.0.0.1:5501/front/html/confirmation.html');
                 confirmationURL.searchParams.append('orderId', data.orderId);
