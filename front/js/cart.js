@@ -1,6 +1,4 @@
-// const productID = document.querySelector('#{product-ID}');
-// const productColor = document.querySelector('#{product-color}');
-
+//set constants to be used by the functions. 
 const cartListing = document.querySelector('#cart__items');
 
 const cartCard = document.querySelector('.cart__item');
@@ -18,13 +16,12 @@ const deleteBtn = document.querySelector('.deleteItem');
 const totalQuant = document.querySelector('#totalQuantity');
 const totalPrice = document.querySelector('#totalPrice');
 
-// Retrive cart from localStorage, convert to JSON.
+// Retrive items from localStorage, convert to JSON.
 // If there is not cart in localStorage, create an empty array. 
-// a||b means, return a if a is true, ortherwise return b. 
 const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-// console.log(cartItems);
 
 
+//get product destials using the product ID
 async function getProductDetails(itemId) {
     try {
         //make an api request with the id of the item in question, return the product info in json format.
@@ -38,6 +35,8 @@ async function getProductDetails(itemId) {
     }
 }
 
+
+//use the information returned by getProductDetails to create and populate each product card in the cart.
 async function populateCartItem(item) {
     try {
         //run getProductDetails by using the id stored in item within cartItems (localStorage)
@@ -72,18 +71,21 @@ async function populateCartItem(item) {
     }
 }
 
+
+//loop through each item inside cartItems (localStorage), pass item to populateCartItem() function
 async function populate() {
-    //loop through each item inside cartItems (localStorage), pass item to populateCartItem() function
     for (const item of cartItems) {
         await populateCartItem(item);
     }
 }
 
 
+//update total quantity, price, cart array, and push to localstorage whenever an item quantity is changed.
 function quantityChange() {
 
     const quantityField = document.querySelectorAll('.cart__item__content__settings__quantity input');
 
+    //loop through array of quantityField and add a listener and other commands.
     for (qf of quantityField) {
         // console.log(qf.value);
 
@@ -96,6 +98,7 @@ function quantityChange() {
             const dataId = article.getAttribute('data-id');
             const dataColor = article.getAttribute('data-color');
 
+            //using the ID, use the API to grab the price. 
             const response = await getProductDetails(dataId);
             const priceAPI = response.price;
 
@@ -105,7 +108,7 @@ function quantityChange() {
             //update the total quantity field
             priceTotalUpdate();
 
-            //update cart array
+            //update cart array using the constants set here. 
             updateCartItems(dataId, dataColor, article);
 
             //push array to localStorage
@@ -115,6 +118,7 @@ function quantityChange() {
 }
 
 
+//update total quantity, price, cart array, and push to localstorage whenever an item is deleted.
 function deleteButton() {
 
     const deleteBtnAll = document.querySelectorAll('.cart__item__content__settings__delete');
@@ -133,7 +137,7 @@ function deleteButton() {
             //get the index of the item within cartItems with the same id and color. 
             const matchIndex = cartItems.findIndex(item => item._id === dataId && item.color === dataColor);
 
-            //use the index to locate and remove the item within cartItem. 
+            //use the index to locate and remove the item within cartItem, remove 1 element. 
             cartItems.splice(matchIndex, 1);
 
             //update localStorage
@@ -146,10 +150,11 @@ function deleteButton() {
 
 }
 
-
+//set the total to 0 and add to it all the quantities shown in the quantity input. 
 function quantityTotalUpdate() {
 
     const quantityField = document.querySelectorAll('.cart__item__content__settings__quantity input');
+    //set the total to 0 before adding up the quantities. 
     let QtySum = parseInt(0);
 
     for (qf of quantityField) {
@@ -159,6 +164,7 @@ function quantityTotalUpdate() {
     };
 }
 
+//set the total to 0 and add to it all the item total prices (quantity*price. Use prices from API for the calculation.
 async function priceTotalUpdate() {
 
     let PriceSum = parseInt(0);
@@ -185,11 +191,14 @@ async function priceTotalUpdate() {
     };
 }
 
+//update cart items object to match the quantity shown in the cart page. 
 function updateCartItems(id, color, article) {
+
     // use the article (closest article) and grab value of quantity input field
     const qty = article.querySelector('input').value;
     console.log(qty);
 
+    // locate the item in cartItem with the same id and color as the ones passed into this function.  
     const match = cartItems.find(item => item._id === id && item.color === color);
 
     if (match) {
@@ -199,10 +208,11 @@ function updateCartItems(id, color, article) {
 
     //for scenarios where user types in 0 in tue quantity input.
     //get the index of the item within cartItems with the same id and color. 
-    //use the index to click the right delete button. 
     const matchIndex = cartItems.findIndex(item => item._id === id && item.color === color);
     const deleteBtnAll = document.querySelectorAll('.deleteItem');
 
+    //if the quantity in the input field is 0, click the appropiate delete button. 
+    //use the index to click the right delete button, which runs the deleteButton function. 
     if (qty === '0') {
         console.log('delete me');
         deleteBtnAll[matchIndex].click();
@@ -211,11 +221,14 @@ function updateCartItems(id, color, article) {
     console.log(cartItems);
 }
 
+//push cartItems object to localstorage.
 function pushToLocalStorage() {
     localStorage.setItem('cart', JSON.stringify(cartItems));
     console.log(localStorage);
 }
 
+
+//used to hide the product card template after it's been used for cloning. 
 function hideTemplate() {
     cartCard.outerHTML = '<!-- -->';
 }
@@ -224,17 +237,22 @@ function hideTemplate() {
 //Form validation
 const order = document.querySelector('#order');
 
+
+//each field has a boolean value of true/false, defaulted to false.
 let isFirstNameValid = false;
 let isLastNameValid = false;
 let isAddressValid = false;
 let isCityValid = false;
 let isEmailValid = false;
 
+
+//Return boolean values for of the fields, used to check each field after user clicks Submit. 
 function allValidator() {
     return [isFirstNameValid, isLastNameValid, isAddressValid, isCityValid, isEmailValid];
 }
 
 
+//Only accept letter characters, show error message and set field's boolean to false when anything else is typed. 
 function validateFirstName() {
     const regexOnlyAlpha = /^[a-zA-Z]+$/;
     const firstName = document.querySelector('#firstName');
@@ -272,6 +290,7 @@ function validateFirstName() {
     });
 }
 
+//Only accept letter characters, show error message and set field's boolean to false when anything else is typed. 
 function validateLastName() {
     const regexOnlyAlpha = /^[a-zA-Z]+$/;
     const lastName = document.querySelector('#lastName');
@@ -309,6 +328,7 @@ function validateLastName() {
     });
 }
 
+//Accep alphanumeric, hash and period, show error message and set field's boolean to false when anything else is typed. 
 function validateAddress() {
     const regexAddress = /[!@$%^&*(),?":{}|<>]/;
     const address = document.querySelector('#address');
@@ -345,6 +365,8 @@ function validateAddress() {
     });
 }
 
+
+//Accept letter characters and period, show error message and set field's boolean to false when anything else is typed. 
 function validateCity() {
     const regexCity = /^[a-zA-Z.-]+(?:[\s.][\/a-zA-Z]+)*$/;
     const city = document.querySelector('#city');
@@ -381,6 +403,7 @@ function validateCity() {
     });
 }
 
+//Accepts emails with @ and at least 2 characters in the top level domain.
 function validateEmail() {
     const regexEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     const email = document.querySelector('#email');
@@ -417,19 +440,24 @@ function validateEmail() {
 }
 
 
+
 function orderBtn() {
     order.addEventListener('click', ($event) => {
 
         // prevent default behavior when clicked. 
         $event.preventDefault();
 
+        //
         function checkValid(item) {
             return item === true;
         };
 
+        //bring in the validator array only when the submit button is clicked.
         const arrayValid = allValidator();
         console.log(arrayValid);
 
+        //use checkValid to evaluate every item within the arrayValid array. 
+        //.every() returns true if all items pass the test. 
         let allValid = arrayValid.every(checkValid);
         
         console.log(allValid);
@@ -437,6 +465,7 @@ function orderBtn() {
         if (allValid === true) {
             console.log('ALL GOOD');
 
+            //grab values of the fields and create a contact object to be used in POST request. 
             const contact = {
                 firstName: document.querySelector('#firstName').value,
                 lastName: document.querySelector('#lastName').value,
@@ -445,15 +474,18 @@ function orderBtn() {
                 email: document.querySelector('#email').value,
             };
 
+            //create an empty products array to be used in the POST request.
             const products = []
 
+            //push the product ids in the cart to the product array. 
             for (item of cartItems) {
                 products.push(item._id);
             }
 
+            //data constant to be used in the POST request. 
             const data = {contact, products};
 
-
+            //making the POST request.
             fetch ('http://localhost:3000/api/products/order', {
                 method: 'POST', 
 
@@ -470,13 +502,16 @@ function orderBtn() {
             .then (data => {
                 console.log('Success:', data);
                 console.log(data.orderId);
+
+                //clear the localStorage as the order has been submitted.
                 localStorage.clear();
         
+                //define the confirmation page url, append the orderID returned by the POST request. 
                 let confirmationURL = new URL('http://127.0.0.1:5501/front/html/confirmation.html');
                 confirmationURL.searchParams.append('orderId', data.orderId);
-                console.log(confirmationURL);
-                // add state to browser's history
-        
+                console.log(confirmationURL);        
+
+                //navigate to the confirmation page with the order confirmation number appended. 
                 window.location.href = confirmationURL;
             })
 
@@ -484,38 +519,12 @@ function orderBtn() {
                 console.error('Error:', error);
             });
 
-
-        
         } else {
             console.log('PROBLEM!');
         }
 
         
 
-    });
-}
-
-
-function saveOrder (data) {
-    fetch ('http://localhost:3000/api/products/order', {
-        method: 'POST', 
-
-        headers: {
-          'Content-Type': 'application/json',
-        },
-
-        body: JSON.stringify(data), 
-    })
-
-    //turn the response into a json
-    .then (response => response.json())
-
-    .then (data => {
-        console.log('Success:', data);
-    })
-
-    .catch ((error) => {
-        console.error('Error:', error);
     });
 }
 
