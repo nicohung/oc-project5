@@ -2,35 +2,27 @@ const itemListing = document.querySelector('#items');
 const productCard = document.getElementById('product-card-template');
 
 
-// Prepare request to the server - create a new instance of XMLHttpRequest()
-let apiRequest = new XMLHttpRequest();
-
-// Make a request to fetch product data from http://localhost:3000/api/products
+// Make a request to fetch product data from http://localhost:3000/api/products using fetch
 const requestPromise = new Promise((resolve, reject) => {
-    // Open a request, do a GET request. 
-    // All the products live as an array in http://localhost:3000/api/products
-    apiRequest.open('GET', 'http://localhost:3000/api/products');
-
-    // Event handler, called when readyState property of XMLHttpRequest() changes
-    // Checks state of the request
-    apiRequest.onreadystatechange = () => {
-
-        // If 4 (Complete) and status is successful (200)
-        // Parse the response, and resolve the promise with the parsed data.
-        // API returns JSON, but the request receives it as text. 
-        if (apiRequest.readyState === 4) {
-            const responseClean = JSON.parse(apiRequest.response);
-            resolve(responseClean);
-
-        // If the status is unsucessful
-        // Parse the response, and reject the promise.
-        } else if (apiRequest.readyState === 4 && apiRequest.status !== 200) {
-            reject(JSON.parse(apiRequest.response));
-        }
-    };
-
-    apiRequest.send();
+    fetch('http://localhost:3000/api/products')
+        .then(response => {
+            // Check if the response is successful (status code 200)
+            if (response.ok) {
+                return response.json(); // Parse the response as JSON
+            } else {
+                return response.json().then(errorData => {
+                    throw new Error(errorData); // Throw an error to be caught by the catch block
+                });
+            }
+        })
+        .then(data => {
+            resolve(data); // Resolve the promise with the parsed data
+        })
+        .catch(error => {
+            reject(error); // Reject the promise with the error
+        });
 });
+
 
 
 // Use the Promise
