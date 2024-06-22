@@ -2,27 +2,36 @@ const itemListing = document.querySelector('#items');
 const productCard = document.getElementById('product-card-template');
 
 
-// Prepare request
+// Prepare request to the server - create a new instance of XMLHttpRequest()
 let apiRequest = new XMLHttpRequest();
 
-// Create a Promise
+// Make a request to fetch product data from http://localhost:3000/api/products
 const requestPromise = new Promise((resolve, reject) => {
+    // Open a request, do a GET request. 
+    // All the products live as an array in http://localhost:3000/api/products
     apiRequest.open('GET', 'http://localhost:3000/api/products');
 
+    // Event handler, called when readyState property of XMLHttpRequest() changes
+    // Checks state of the request
     apiRequest.onreadystatechange = () => {
+
+        // If 4 (Complete) and status is successful (200)
+        // Parse the response, and resolve the promise with the parsed data.
+        // API returns JSON, but the request receives it as text. 
         if (apiRequest.readyState === 4) {
-            // API returns JSON, but the request receives it as text. 
             const responseClean = JSON.parse(apiRequest.response);
             resolve(responseClean);
 
+        // If the status is unsucessful
+        // Parse the response, and reject the promise.
         } else if (apiRequest.readyState === 4 && apiRequest.status !== 200) {
-            // Reject the promise if the status is not 200
             reject(JSON.parse(apiRequest.response));
         }
     };
 
     apiRequest.send();
 });
+
 
 // Use the Promise
 requestPromise
@@ -68,15 +77,3 @@ requestPromise
 
 
 
-// const productCard = document.querySelector('#product-card');
-// var clone = productCard.cloneNode(true);
-
-// itemListing.appendChild(clone);
-// clone = productCard.cloneNode(true);
-// itemListing.appendChild(clone);
-// clone = productCard.cloneNode(true);
-// itemListing.appendChild(clone);
-// clone = productCard.cloneNode(true);
-
-// productName.textContent = responseClean[0].name;
-// productDescription.textContent = responseClean[0].name;

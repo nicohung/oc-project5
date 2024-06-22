@@ -11,28 +11,16 @@ const colorContainer = document.getElementById('colors');
 const regexPattern = /(?<=\?id=)[^&]+/;
 const regexMatch = regexPattern.exec(window.location.href);
 const productID = regexMatch[0];
-// console.log(productID);
 
 const quantity = document.querySelector('#quantity');
 const CTA = document.querySelector('#addToCart');
-
-// // create error message fot ATB button
-// let lineBreak = document.createElement('br');
-// let newElement = document.createElement('p');
-// newElement.id = 'ATBErrorMsg';
-// //Insert the html, 'afterend' is the position.
-// CTA.insertAdjacentHTML('afterend', lineBreak.outerHTML + newElement.outerHTML);
-
-// Prepare request
-let apiRequest = new XMLHttpRequest();
-
 
 fetch('http://localhost:3000/api/products/' + productID) 
     .then(response => response.json())
 
     //then() method is called if the Promise is resolved (successful response)
     .then(response => {
-        // console.log(response);
+        console.log(response);
 
         imageContainer.appendChild(image);
         image.src = response.imageUrl;
@@ -42,6 +30,9 @@ fetch('http://localhost:3000/api/products/' + productID)
         description.textContent = response.description;
 
         let colorList = response.colors;
+        // i is the loop counter
+        // it will run as long as i is less then the length of colorList array.
+        // i increaments by 1 after each iteration. 
         for (i=0; i < colorList.length; i++) {
             const colorOption = document.createElement('option');
             colorContainer.appendChild(colorOption);
@@ -84,7 +75,7 @@ CTA.addEventListener ('click', ($event) => {
             } else {
                 // if there is no match, add a new entry. 
                 const ATBProduct = {
-                    _id: productID,
+                    _id: productID, //extracted from url using regex
                     color: colorContainer.value,
                     quantity: quantity.value,
                 };
@@ -117,11 +108,3 @@ CTA.addEventListener ('click', ($event) => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
     console.log(localStorage);
 });
-
-
-
-
-  
-
-
-// cartItems.filter(())

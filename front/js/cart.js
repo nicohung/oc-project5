@@ -21,7 +21,7 @@ const totalPrice = document.querySelector('#totalPrice');
 const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
 
 
-//get product destials using the product ID
+//get product details using the product ID
 async function getProductDetails(itemId) {
     try {
         //make an api request with the id of the item in question, return the product info in json format.
@@ -42,7 +42,6 @@ async function populateCartItem(item) {
         //run getProductDetails by using the id stored in item within cartItems (localStorage)
         //the returned json product info will be stored in const response
         const response = await getProductDetails(item._id);
-        // console.log(response);
 
         //for each product returned, clone and populate a product card.
         const clonedProductCard = cartCard.cloneNode(true);
@@ -83,24 +82,23 @@ async function populate() {
 //update total quantity, price, cart array, and push to localstorage whenever an item quantity is changed.
 function quantityChange() {
 
+    //get all the quantity input fields in an array
     const quantityField = document.querySelectorAll('.cart__item__content__settings__quantity input');
 
     //loop through array of quantityField and add a listener and other commands.
     for (qf of quantityField) {
         // console.log(qf.value);
 
+        // listen for changes, when the value changes or input loses focus
+        // $event has information about the element that triggered the change
         qf.addEventListener ('change', async ($event) => {
 
-            //get the element where the event occured. 
+            //get the <article> element closest to where the event occured. 
             const article = $event.target.closest('article');
 
             //get the dataId and dataColor from the article element.
             const dataId = article.getAttribute('data-id');
             const dataColor = article.getAttribute('data-color');
-
-            //using the ID, use the API to grab the price. 
-            const response = await getProductDetails(dataId);
-            const priceAPI = response.price;
 
             //update the total quantity field
             quantityTotalUpdate();
@@ -166,11 +164,12 @@ function quantityTotalUpdate() {
 
 //set the total to 0 and add to it all the item total prices (quantity*price. Use prices from API for the calculation.
 async function priceTotalUpdate() {
-
+    //set the new price sum to 0
     let PriceSum = parseInt(0);
+    //get all the cart items
     const cartCardAll = document.querySelectorAll('.cart__item');
 
-    //loop through cart products
+    //loop through cart items
     for (item of cartCardAll) {
         //for each product, grab their ID. 
         const itemID = item.getAttribute('data-id');
@@ -179,24 +178,23 @@ async function priceTotalUpdate() {
         const response = await getProductDetails(itemID);
         const priceAPI = response.price;
 
-        //grab the qty for the product
+        //grab the qty for the item
         const qf = item.querySelector('.cart__item__content__settings__quantity input');
 
-        // console.log(priceAPI);
-        // console.log(qf.value);
-
-        //multiple aty with price from API, and add it to the total price sum. 
+        //multiple quantity with price from API, and add it to the total price sum. 
         PriceSum += parseInt(qf.value) * parseInt(priceAPI);
+        //update the total price html element
         totalPrice.textContent = PriceSum;
     };
 }
 
 //update cart items object to match the quantity shown in the cart page. 
+//using the id, color and article from the item where a quantity change was detected.
 function updateCartItems(id, color, article) {
 
     // use the article (closest article) and grab value of quantity input field
     const qty = article.querySelector('input').value;
-    console.log(qty);
+    // console.log(qty);
 
     // locate the item in cartItem with the same id and color as the ones passed into this function.  
     const match = cartItems.find(item => item._id === id && item.color === color);
@@ -206,7 +204,7 @@ function updateCartItems(id, color, article) {
         match.quantity = String(qty);
     }
 
-    //for scenarios where user types in 0 in tue quantity input.
+    //for scenarios where user types in 0 in the quantity input.
     //get the index of the item within cartItems with the same id and color. 
     const matchIndex = cartItems.findIndex(item => item._id === id && item.color === color);
     const deleteBtnAll = document.querySelectorAll('.deleteItem');
@@ -218,13 +216,21 @@ function updateCartItems(id, color, article) {
         deleteBtnAll[matchIndex].click();
     }
 
-    console.log(cartItems);
+    // console.log(cartItems);
 }
 
 //push cartItems object to localstorage.
 function pushToLocalStorage() {
+    // convert the cartItems array to a JSON string and store it in localStorage
     localStorage.setItem('cart', JSON.stringify(cartItems));
-    console.log(localStorage);
+
+    // Retrieve the JSON string from localStorage
+    const storedCart = localStorage.getItem('cart');
+    
+    // Parse the JSON string back into a JavaScript object
+    const parsedCart = JSON.parse(storedCart);
+    
+    console.log(parsedCart);
 }
 
 
@@ -234,7 +240,11 @@ function hideTemplate() {
 }
 
 
+
+
+
 //Form validation
+//Access the Order button
 const order = document.querySelector('#order');
 
 
@@ -258,21 +268,26 @@ function validateFirstName() {
     const firstName = document.querySelector('#firstName');
     const firstNameError = document.querySelector('#firstNameErrorMsg');
     
+    //listen to every input event, runs after usr types anything in the field.
     firstName.addEventListener('input', ($event) => {
         const value = $event.target.value;
-        const valueNoSpaces = value.replace(/\s+/g, '');
+        //regex matches any single or multiple spaces, replace with empty string.
+        const valueNoSpaces = value.replace(/\s+/g, ''); 
 
         try {
+            //if input passes the only character test, set isFirstNameValud to True. 
             if (regexOnlyAlpha.test(valueNoSpaces)) {
                 console.log('Input is valid');
                 isFirstNameValid = true;
                 throw '';
             }
+            //if field is empty
             if (valueNoSpaces === '') {
                 console.log('Input is invalid');
                 isFirstNameValid = false;
                 throw 'Please enter your first name.';
             } 
+            //if field has non-letter characters
             else {
                 console.log('Input is invalid');
                 isFirstNameValid = false;
@@ -280,7 +295,9 @@ function validateFirstName() {
             }
         }
 
+        //catch the error thrown in the try block
         catch(error){
+            //set the error text in the html
             firstNameError.textContent = error;
         }
 
@@ -447,20 +464,16 @@ function orderBtn() {
         // prevent default behavior when clicked. 
         $event.preventDefault();
 
-        //
         function checkValid(item) {
             return item === true;
         };
 
         //bring in the validator array only when the submit button is clicked.
         const arrayValid = allValidator();
-        console.log(arrayValid);
 
         //use checkValid to evaluate every item within the arrayValid array. 
         //.every() returns true if all items pass the test. 
         let allValid = arrayValid.every(checkValid);
-        
-        console.log(allValid);
 
         if (allValid === true) {
             console.log('ALL GOOD');
@@ -506,10 +519,22 @@ function orderBtn() {
                 //clear the localStorage as the order has been submitted.
                 localStorage.clear();
         
-                //define the confirmation page url, append the orderID returned by the POST request. 
-                let confirmationURL = new URL('http://127.0.0.1:5501/front/html/confirmation.html');
-                confirmationURL.searchParams.append('orderId', data.orderId);
-                console.log(confirmationURL);        
+                // Get the orderId form the response
+                const orderId = data.orderId;
+
+                // get the current file path
+                const currentFilePath = window.location.href;
+
+                // replace "cart.html" with "confirmation.html"
+                const confirmationURLString = currentFilePath.replace('cart.html', 'confirmation.html');
+                console.log(confirmationURLString);
+
+                // create an URL from the string
+                confirmationURL = new URL(confirmationURLString);
+
+                // Append the orderId as a query parameter
+                confirmationURL.searchParams.append('orderId', orderId);
+                console.log(confirmationURL);
 
                 //navigate to the confirmation page with the order confirmation number appended. 
                 window.location.href = confirmationURL;
